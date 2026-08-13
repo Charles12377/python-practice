@@ -1,0 +1,21 @@
+xiaomin={
+    'first_name':'敏',
+    'last_name':'睿',
+    'age':21,
+    'city':'兰州',
+    }
+xiaoyang={
+    'first_name':'杨',
+    'last_name':'振华',
+    'age':20,
+    'city':'太原',
+    }
+xiaochen={
+    'first_name':'陈',
+    'last_name':'炳辉',
+    'age':21,
+    'city':'武汉',
+    }
+people=[xiaomin,xiaoyang,xiaochen]
+for man in people:
+    print(man)
