@@ -10,7 +10,3 @@ while will == True:
         will=False
 for Name,Place in travel_places.items():
     print(f"{Name} want to {Place}.")
-
-
-
-

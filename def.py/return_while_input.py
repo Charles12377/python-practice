@@ -5,7 +5,7 @@ def make_album(music,musician,age=None):
     return message
 while True:
     print("Enter your favourate music and musician.")
-    print("Enter 'q' will quit.")
+    print("(Enter 'q' will quit.)")
     i_music=input("Enter your favourate music:")
     if i_music == 'q':
         break

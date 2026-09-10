@@ -19,16 +19,13 @@ class Restaurant:
     def increment_number_saved(self,increment_number):
         self.number_save += increment_number
 
-restaurant=Restaurant('兰州牛肉面','noodles')
-print(restaurant.name)
-print(restaurant.type)
-restaurant.describe_restaurant()
-restaurant.open_restaurant()
-restaurant_1=Restaurant('古丽花儿','xingjiang foods')
-restaurant_1.describe_restaurant()
-restaurant.number_save=5
-print(restaurant.number_save)
-restaurant.set_number_saved(8)
-print(restaurant.number_save)
-restaurant.increment_number_saved(5)
-print(restaurant.number_save)
+class IceCreamstand(Restaurant):
+    def __init__(self,name,type,*flavors):
+        super().__init__(name,type)
+        self.flavors=flavors
+
+    def descripe_ice(self):
+        print(f"My favourate icecream is {self.flavors}.")
+
+icecream=IceCreamstand('puddy','ice','老冰棍','小布丁','甜筒')
+icecream.descripe_ice()    
