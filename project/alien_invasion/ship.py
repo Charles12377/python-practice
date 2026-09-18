@@ -20,22 +20,33 @@ class Ship:
         self.rect.midbottom = self.screen_rect.midbottom
 
         # 在飞船的属性x 中存储一个浮点数
-        self.x = float(self.rect.x)  
+        self.x = float(self.rect.x)
+        #在飞船属性y 中存储一个浮点数
+        self.y = float(self.rect.y)
 
         # 移动标志（飞船一开始不移动）
         self.moving_right = False
-        self.moving_left = False 
+        self.moving_left = False
+        self.moving_top=False
+        self.moving_bottom=False 
 
     def update(self): 
         """根据移动标志调整飞船的位置""" 
         #更新飞船的属性x的值，而不是其外接矩形的属性x 的值
+        print("top:", self.moving_top, "bottom:", self.moving_bottom)
+
         if self.moving_right and self.rect.right < self.screen_rect.right: 
             self.x += self.settings.ship_speed   
         if self.moving_left and self.rect.left > 0:  
             self.x -= self.settings.ship_speed 
+        if self.moving_top and self.rect.top > 0:
+            self.y -= self.settings.ship_speed
+        if self.moving_bottom and self.rect.bottom < self.screen_rect.bottom:
+            self.y += self.settings.ship_speed
 
         #根据self.x 更新rect 对象
         self.rect.x = self.x 
+        self.rect.y = self.y
 
 
     def blitme(self): 
