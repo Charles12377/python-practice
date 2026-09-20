@@ -47,6 +47,11 @@ class Ship:
         self.rect.x = self.x 
         self.rect.y = self.y
 
+    def center_ship(self): 
+        """将飞船放在屏幕底部的中央""" 
+        self.rect.midbottom = self.screen_rect.midbottom 
+        self.x = float(self.rect.x)
+        self.y = float(self.rect.y)
 
     def blitme(self): 
         """在指定位置绘制飞船""" 

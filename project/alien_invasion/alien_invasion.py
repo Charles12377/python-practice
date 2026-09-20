@@ -1,11 +1,16 @@
-import sys 
+import sys
+from time import sleep  
  
 import pygame 
 
 from settings import Settings
+from game_stats import GameStats
+from scoreboard import Scoreboard 
 from ship import Ship 
 from bullet import Bullet
 from alien import Alien
+
+from button import Button
 
 class AlienInvasion: 
     """管理游戏资源和行为的类""" 
@@ -20,30 +25,38 @@ class AlienInvasion:
                                                 self.settings.screen_height))  
         pygame.display.set_caption("Alien Invasion")
 
+        # 创建一个用于存储游戏统计信息的实例,并创建记分牌
+        self.stats = GameStats(self) 
+        self.sb = Scoreboard(self)
+
         self.ship = Ship(self)
         self.bullets = pygame.sprite.Group()
         self.aliens = pygame.sprite.Group() 
         
         self._create_fleet()
 
-        self.shooting = False       # 是否按住空格射击
-        self.bullet_cool_down = 0   # 子弹冷却计时器
-        self.bullet_cool_limit = 8  # 每隔8帧发射一颗，可以调小变快
- 
+        # 游戏启动后处于活动状态
+        self.game_active = False
+
+        # 连发相关状态变量
+        self.shooting = False
+        self.bullet_cool_down = 0
+        self.bullet_cool_limit = 8
+
+        # 创建 Play 按钮
+        self.play_button = Button(self, "Play")
  
     def run_game(self): 
         """开始游戏的主循环""" 
         while True:
             self._check_events()
-            # =====新增：持续发射子弹逻辑=====
-            if self.shooting:
-                self.bullet_cool_down +=1
-                if self.bullet_cool_down >= self.bullet_cool_limit:
-                    self._fire_bullet()
-                    self.bullet_cool_down = 0
-            self.ship.update()  
-            self._update_bullets()
-            self._update_aliens()
+
+            if self.game_active:
+                self.ship.update()
+                self._continuous_fire()  
+                self._update_bullets()
+                self._update_aliens()
+            
             self._update_screen()
             self.clock.tick(60)
 
@@ -57,6 +70,32 @@ class AlienInvasion:
 
             elif event.type == pygame.KEYUP: 
                 self._check_keyup_events(event)
+            
+            elif event.type == pygame.MOUSEBUTTONDOWN: 
+                mouse_pos = pygame.mouse.get_pos() 
+                self._check_play_button(mouse_pos)
+
+    def _check_play_button(self, mouse_pos): 
+        """在玩家单击 Play 按钮时开始新游戏""" 
+        button_clicked = self.play_button.rect.collidepoint(mouse_pos) 
+        if button_clicked and not self.game_active:
+            # 还原游戏设置
+            self.settings.initialize_dynamic_settings()
+
+            # 重置游戏的统计信息
+            self.stats.reset_stats() 
+            self.game_active = True 
+ 
+            # 清空外星人列表和子弹列表
+            self.bullets.empty() 
+            self.aliens.empty() 
+ 
+            # 创建一个新的外星舰队，并将飞船放在屏幕底部的中央
+            self._create_fleet() 
+            self.ship.center_ship()
+
+            # 隐藏光标
+            pygame.mouse.set_visible(False)
 
     def _check_keydown_events(self, event): 
         """响应按下""" 
@@ -72,8 +111,7 @@ class AlienInvasion:
             pygame.quit()
             sys.exit()
         elif event.key == pygame.K_SPACE: 
-            self.shooting = True 
-
+            self.shooting = True
 
     def _check_keyup_events(self, event): 
         """响应释放""" 
@@ -94,6 +132,14 @@ class AlienInvasion:
             new_bullet = Bullet(self) 
             self.bullets.add(new_bullet)
 
+    def _continuous_fire(self):
+        """专门处理子弹连发逻辑：计时，满足冷却就发射一颗子弹"""
+        if self.shooting:
+            self.bullet_cool_down += 1
+            if self.bullet_cool_down >= self.bullet_cool_limit:
+                self._fire_bullet()
+                self.bullet_cool_down = 0
+
     def _update_bullets(self):
         """更新子弹的位置并删除已消失的子弹""" 
         # 更新子弹的位置
@@ -103,6 +149,20 @@ class AlienInvasion:
         for bullet in self.bullets.copy(): 
             if bullet.rect.bottom <= 0: 
                 self.bullets.remove(bullet)
+
+        self._check_bullet_alien_collisions()
+
+    def _check_bullet_alien_collisions(self):
+        # 检查是否有子弹击中了外星人
+        # 如果是，就删除相应的子弹和外星人
+        collisions = pygame.sprite.groupcollide( self.bullets,
+        self.aliens, False, True)
+         
+        if not self.aliens: 
+            # 删除现有的子弹并创建一个新的外星舰队
+            self.bullets.empty() 
+            self._create_fleet()
+            self.settings.increase_speed()
     
     def _create_fleet(self): 
         """创建一个外星舰队""" 
@@ -143,12 +203,47 @@ class AlienInvasion:
             alien.rect.y += self.settings.fleet_drop_speed 
         self.settings.fleet_direction *= -1
 
+    def _ship_hit(self): 
+        """响应飞船和外星人的碰撞"""
+        if self.stats.ships_left > 0: 
+            # 将 ships_left 减 1 
+            self.stats.ships_left -= 1 
+        
+            # 清空外星人列表和子弹列表 
+            self.bullets.empty() 
+            self.aliens.empty() 
+        
+            # 创建一个新的外星舰队，并将飞船放在屏幕底部的中央 
+            self._create_fleet() 
+            self.ship.center_ship() 
+        
+            # 暂停 
+            sleep(0.5)
+
+        else: 
+            self.game_active = False
+            pygame.mouse.set_visible(True)
+
+    def _check_aliens_bottom(self): 
+        """检查是否有外星人到达了屏幕的下边缘""" 
+        for alien in self.aliens.sprites(): 
+            if alien.rect.bottom >= self.settings.screen_height: 
+                # 像飞船被撞到一样进行处理 
+                self._ship_hit() 
+                break
+
     def _update_aliens(self): 
         """检查是否有外星人位于屏幕边缘，并更新整个外星舰队的位置""" 
         self._check_fleet_edges() 
         self.aliens.update() 
-        
 
+        # 检测外星人和飞船之间的碰撞
+        if pygame.sprite.spritecollideany(self.ship, self.aliens): 
+            self._ship_hit()
+
+        # 检查是否有外星人到达了屏幕的下边缘
+        self._check_aliens_bottom()
+        
     def _update_screen(self): 
         """更新屏幕上的图像，并切换到新屏幕""" 
         self.screen.fill(self.settings.bg_color)
@@ -156,6 +251,13 @@ class AlienInvasion:
             bullet.draw_bullet()  
         self.ship.blitme()
         self.aliens.draw(self.screen) 
+
+        # 显示得分
+        self.sb.show_score() 
+
+        # 如果游戏处于非活动状态，就绘制 Play 按钮
+        if not self.game_active: 
+            self.play_button.draw_button() 
 
         pygame.display.flip() 
  
