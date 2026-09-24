@@ -27,6 +27,6 @@ ax.set_xlabel(lables['x'])
 ax.set_ylabel(lables['y']) 
 
 ax.set_xticks(poss_results)
-ax.tick_params(rotation=60)
+ax.tick_params(axis='x',rotation=60)
 
 plt.show()
