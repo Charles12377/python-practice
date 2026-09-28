@@ -5,7 +5,7 @@ y_value=[x**3 for x in x_value]
 
 plt.style.use('seaborn-v0_8')
 fig, ax = plt.subplots()
-ax.scatter(x_value,y_value,c=y_value,cmap=plt.cm.Reds,edgecolors='none',s=13)
+ax.scatter(x_value,y_value,c=y_value,cmap=plt.cm.Reds,s=13)
 
 #设置图题并给坐标轴加上标签
 ax.set_title("Cube Numbers",fontsize=24)
