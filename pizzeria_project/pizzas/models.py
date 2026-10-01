@@ -1,22 +1,22 @@
 from django.db import models
 
-class Topic(models.Model): 
-    """用户学习的主题""" 
-    text = models.CharField(max_length=200) 
-    date_added = models.DateTimeField(auto_now_add=True)
+class Pizza(models.Model): 
+    """Defy a class of Pizza""" 
+    name = models.CharField(max_length=200) 
     
-    def __str__(self):  
+    def __str__(self): 
+        date_added = models.DateTimeField(auto_now_add=True) 
         """返回模型的字符串表示""" 
-        return self.text
+        return self.name
 
-class Entry(models.Model): 
+class Topping(models.Model): 
     """学到的有关某个主题的具体知识""" 
-    topic = models.ForeignKey(Topic, on_delete=models.CASCADE) 
+    pizza = models.ForeignKey(Pizza, on_delete=models.CASCADE) 
     text = models.TextField() 
     date_added = models.DateTimeField(auto_now_add=True) 
 
     class Meta: 
-        verbose_name_plural = 'entries' 
+        verbose_name_plural = 'toppings' 
 
     def __str__(self): 
         """返回一个表示条目的简单字符串""" 
