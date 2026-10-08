@@ -3,9 +3,9 @@ from django.db import models
 class Pizza(models.Model): 
     """Defy a class of Pizza""" 
     name = models.CharField(max_length=200) 
+    date_added = models.DateTimeField(auto_now_add=True)
     
-    def __str__(self): 
-        date_added = models.DateTimeField(auto_now_add=True) 
+    def __str__(self):  
         """返回模型的字符串表示""" 
         return self.name
 
