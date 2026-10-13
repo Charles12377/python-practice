@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     #blog程序
     'blogs',
+    'accounts',
 
     #django默认程序
     'django.contrib.admin',
@@ -129,3 +130,7 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+# 我的设置
+LOGIN_REDIRECT_URL = 'blogs:index'
+LOGOUT_REDIRECT_URL = 'blogs:index'

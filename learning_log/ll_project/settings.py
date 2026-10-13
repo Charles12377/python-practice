@@ -33,6 +33,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     # 我的应用程序
     'learning_logs', 
+    'accounts',
     
     # Django 默认添加的应用程序
     'django.contrib.admin',
@@ -129,3 +130,8 @@ MAILERS = {
         'BACKEND': 'django.core.mail.backends.console.EmailBackend',
     },
 }
+
+#我的设置
+LOGIN_REDIRECT_URL='learning_logs:index'
+LOGOUT_REDIRECT_URL='learning_logs:index'
+LOGIN_URL = 'accounts:login'
